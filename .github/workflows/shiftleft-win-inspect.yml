@@ -37,7 +37,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Analyze with Inspect
-      run: .\sl analyze --no-diagnostic --force --app ShiftLeftJavaWin --tag branch=${GITHUB_REF} --java --cpg target/hello-shiftleft-0.0.1.jar
+      run: .\sl analyze --no-diagnostic --verbose --force --app ShiftLeftJavaWin --tag branch=${GITHUB_REF} --java --cpg target/hello-shiftleft-0.0.1.jar
       env:
         SHIFTLEFT_ORG_ID: ${{ secrets.SHIFTLEFT_ORG_ID }}
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
