@@ -29,7 +29,7 @@ steps:
   displayName: Analyze with Inspect
   inputs:
     script: |
-      $(Agent.HomeDirectory)\sl.exe analyze --force --app ShiftLeftJavaAzWin --tag branch=$(Build.SourceBranchName) --java --cpg target/hello-shiftleft-0.0.1.jar
+      $(Agent.HomeDirectory)\sl.exe analyze --force --app ShiftLeftJavaAzWin --verbose --tag branch=$(Build.SourceBranchName) --java --cpg target/hello-shiftleft-0.0.1.jar
     workingDirectory: '$(Build.SourcesDirectory)'
   env:
     SHIFTLEFT_ORG_ID: $(SHIFTLEFT_ORG_ID)
