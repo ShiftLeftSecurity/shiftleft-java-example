@@ -77,7 +77,7 @@ public class CustomerController {
 
 	@Autowired
 	Environment env;
-	
+
 	private static Logger log = LoggerFactory.getLogger(CustomerController.class);
 
 	@PostConstruct
@@ -293,8 +293,8 @@ public class CustomerController {
     // empty for now, because we debug
     Set<Account> accounts1 = new HashSet<Account>();
     //dateofbirth example -> "1982-01-10"
-    Customer customer1 = new Customer(customerId, clientId, firstName, lastName, DateTime.parse(dateOfBirth).toDate(),
-                                      ssn, socialSecurityNum, tin, phoneNumber, new Address("Debug str",
+    Customer customer1 = new Customer(HtmlUtils.htmlEscape(customerId), clientId, HtmlUtils.htmlEscape(firstName), HtmlUtils.htmlEscape(lastName), DateTime.parse(dateOfBirth).toDate(),
+                                      HtmlUtils.htmlEscape(ssn), HtmlUtils.htmlEscape(socialSecurityNum), HtmlUtils.htmlEscape(tin), HtmlUtils.htmlEscape(phoneNumber), new Address("Debug str",
                                       "", "Debug city", "CA", "12345"),
                                       accounts1);
 
