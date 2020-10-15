@@ -27,27 +27,27 @@ public class AccountController {
     @GetMapping("/account")
     public Iterable<Account> getAccountList(HttpServletResponse response, HttpServletRequest request) {
         response.addHeader("test-header-detection", new Account().toString());
-        log.info("Account Data is {}", this.accountRepository.findOne(1l).toString());
+        // log.info("Account Data is {}", this.accountRepository.findOne(1l).toString());
         return this.accountRepository.findAll();
     }
 
     @PostMapping("/account")
     public Account createAccount(Account account) {
         this.accountRepository.save(account);
-        log.info("Account Data is {}", account.toString());
+        // log.info("Account Data is {}", account.toString());
         return account;
     }
 
     @GetMapping("/account/{accountId}")
     public Account getAccount(@PathVariable long accountId) {
-        log.info("Account Data is {}", this.accountRepository.findOne(1l).toString());
+        // log.info("Account Data is {}", this.accountRepository.findOne(1l).toString());
         return this.accountRepository.findOne(accountId);
     }
 
     @PostMapping("/account/{accountId}/deposit")
     public Account depositIntoAccount(@RequestParam double amount, @PathVariable long accountId) {
         Account account = this.accountRepository.findOne(accountId);
-        log.info("Account Data is {}", account.toString());
+        // log.info("Account Data is {}", account.toString());
         account.deposit(amount);
         this.accountRepository.save(account);
         return account;
@@ -58,7 +58,7 @@ public class AccountController {
         Account account = this.accountRepository.findOne(accountId);
         account.withdraw(amount);
         this.accountRepository.save(account);
-        log.info("Account Data is {}", account.toString());
+        // log.info("Account Data is {}", account.toString());
         return account;
     }
 
@@ -67,7 +67,7 @@ public class AccountController {
         Account account = this.accountRepository.findOne(accountId);
         account.addInterest();
         this.accountRepository.save(account);
-        log.info("Account Data is {}", account.toString());
+        // log.info("Account Data is {}", account.toString());
         return account;
     }
 

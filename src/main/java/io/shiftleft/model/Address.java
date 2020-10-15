@@ -83,8 +83,11 @@ public class Address {
 
   @Override
   public String toString() {
+    /*
     return "Address [id=" + id + ", address1=" + address1 + ", address2=" + address2 + ", city=" + city + ", state="
         + state + ", zipCode=" + zipCode + "]";
+     */
+    return "Address [id=\"" + id + "\"]";
   }
 
 }

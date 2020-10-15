@@ -99,7 +99,10 @@ public class Account {
 
   @Override
   public String toString() {
+    /*
     return "Account [id=" + id + ", type=" + type + ", routingNumber=" + routingNumber + ", accountNumber="
         + accountNumber + ", balance=" + balance + ", interest=" + interest + "]";
+     */
+    return "Account [id=\"" + id + "\"]";
   }
 }

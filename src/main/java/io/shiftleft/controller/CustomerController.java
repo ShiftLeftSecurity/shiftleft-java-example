@@ -84,8 +84,8 @@ public class CustomerController {
 	public void init() {
 		log.info("Start Loading SalesForce Properties");
 		log.info("Url is {}", env.getProperty("sfdc.url"));
-		log.info("UserName is {}", env.getProperty("sfdc.username"));
-		log.info("Password is {}", env.getProperty("sfdc.password"));
+		// log.info("UserName is {}", env.getProperty("sfdc.username"));
+		// log.info("Password is {}", env.getProperty("sfdc.password"));
 		log.info("End Loading SalesForce Properties");
 	}
 
@@ -96,7 +96,7 @@ public class CustomerController {
 		httpPost.setEntity(new StringEntity(event));
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(env.getProperty("sfdc.username"),
 				env.getProperty("sfdc.password"));
-		httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
+		// httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
 
 		CloseableHttpResponse response = client.execute(httpPost);
 		log.info("Response from SFDC is {}", response.getStatusLine().getStatusCode());
@@ -123,8 +123,8 @@ public class CustomerController {
 	  }
 
 	  Account account = new Account(4242l,1234, "savings", 1, 0);
-	  log.info("Account Data is {}", account);
-	  log.info("Customer Data is {}", customer);
+	  // log.info("Account Data is {}", account);
+	  // log.info("Customer Data is {}", customer);
 
       try {
         dispatchEventToSalesForce(String.format(" Customer %s Logged into SalesForce", customer));
@@ -202,7 +202,7 @@ public class CustomerController {
             // encode the file settings, md5sum is removed
             String s = new String(Base64.getEncoder().encode(filecontent.replace(md5sum, "").getBytes()));
             // setting the new cookie
-            httpResponse.setHeader("Cookie", "settings=" + s + "," + md5sum);
+            // httpResponse.setHeader("Cookie", "settings=" + s + "," + md5sum);
             return;
           }
         }
@@ -300,10 +300,11 @@ public class CustomerController {
 
     customerRepository.save(customer1);
     httpResponse.setStatus(HttpStatus.CREATED.value());
+    /*
     httpResponse.setHeader("Location", String.format("%s/customers/%s",
                            request.getContextPath(), customer1.getId()));
-
-    return customer1.toString().toLowerCase().replace("script","");
+	*/
+    return customer1.toString();
   }
 
 	/**
@@ -319,8 +320,8 @@ public class CustomerController {
 	public void debugEscaped(@RequestParam String firstName, HttpServletResponse httpResponse,
 					  WebRequest request) throws IOException{
 		String escaped = HtmlUtils.htmlEscape(firstName);
-		System.out.println(escaped);
-		httpResponse.getOutputStream().println(escaped);
+		// System.out.println(escaped);
+		httpResponse.getOutputStream().println(escaped.substring(0, 3) + "*****");
 	}
 	/**
 	 * Gets all customers.
@@ -346,9 +347,10 @@ public class CustomerController {
 		Customer createdcustomer = null;
 		createdcustomer = customerRepository.save(customer);
 		httpResponse.setStatus(HttpStatus.CREATED.value());
+		/*
 		httpResponse.setHeader("Location",
 				String.format("%s/customers/%s", request.getContextPath(), customer.getId()));
-
+		*/
 		return createdcustomer;
 	}
 
