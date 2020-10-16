@@ -1,5 +1,6 @@
 package io.shiftleft.controller;
 
+import io.shiftleft.data.DocumentTarpit;
 import io.shiftleft.model.AuthToken;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -134,4 +136,10 @@ public class AdminController {
   public String doGetLogin(HttpServletResponse response, HttpServletRequest request) {
     return "redirect:/";
   }
+
+  @RequestMapping(value = "/admin/getDoc/{docName}", method = RequestMethod.GET)
+  public String doGetDocument(@PathVariable("docName") String docName) {
+    return DocumentTarpit.getDocument(docName).getTextContent();
+  }
+
 }
