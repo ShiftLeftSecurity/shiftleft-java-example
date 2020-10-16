@@ -255,10 +255,17 @@ public class CustomerController {
 
     FileOutputStream fos = new FileOutputStream(file, true);
     // First entry is the filename -> remove it
-    String[] settingsArr = Arrays.copyOfRange(settings, 1, settings.length);
-    // on setting at a linez
-    fos.write(String.join("\n",settingsArr).getBytes());
-    fos.write(("\n"+cookie[cookie.length-1]).getBytes());
+	String[] settingsArr = Arrays.copyOfRange(settings, 1, settings.length);
+	// Instead of writing the entire value from the cookie, use an allow list based file write
+	for (String asetting : settingsArr) {
+		if (asetting.startsWith("language") && asetting.length() > 10) {
+			String langCode = asetting.substring(8, 10);
+			if (langCode.equals("en")) {
+				String langSetting = "language=english";
+				fos.write(langSetting.getBytes());
+			}
+		}
+	}
     fos.close();
     httpResponse.getOutputStream().println("Settings Saved");
   }

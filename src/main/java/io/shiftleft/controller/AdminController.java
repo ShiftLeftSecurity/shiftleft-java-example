@@ -89,7 +89,8 @@ public class AdminController {
       // no cookie no fun
       if (!auth.equals("notset")) {
         if(isAdmin(auth)) {
-          request.getSession().setAttribute("auth",auth);
+          AuthToken authToken = new AuthToken(AuthToken.ADMIN);
+          request.getSession().setAttribute("auth", authToken.toBase64());
           return succ;
         }
       }

@@ -1,6 +1,11 @@
 package io.shiftleft.model;
 
 import java.io.Serializable;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Base64;
 
 public class AuthToken implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -30,5 +35,17 @@ public class AuthToken implements Serializable {
 
   public void setRole(int role) {
     this.role = role;
+  }
+
+  public String toBase64() {
+    try {
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(bos);
+      oos.writeObject(this);
+      return new String(Base64.getEncoder().encode(bos.toByteArray()));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 }
