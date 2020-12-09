@@ -54,3 +54,4 @@ jobs:
         fi
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+        SL_CPG_OPTS: "-J-Xms2g -J-Xmx8g"
