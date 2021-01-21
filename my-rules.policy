@@ -1,4 +1,3 @@
-IMPORT io.shiftleft/default
 IMPORT io.shiftleft/defaultdict
 
 ### These methods are approved by AppSec ###
@@ -13,8 +12,13 @@ IMPORT io.shiftleft/defaultdict
 # Return type: boolean
 # Arguments: String (Expressed as java.lang.String in full form)
 
+IMPORT io.shiftleft/xss
+IMPORT io.shiftleft/execute
+IMPORT io.shiftleft/fileWrite
+IMPORT io.shiftleft/deserialization
+IMPORT io.shiftleft/weakRandom
+IMPORT io.shiftleft/weakHash
+IMPORT io.shiftleft/fileRead
+IMPORT io.shiftleft/sessionInject
+
 TAG "CHECK" METHOD -f "io.shiftleft.controller.AdminController.isAdmin:boolean(java.lang.String)"
-
-### Suppress the log methods
-
-HIDE IO log
