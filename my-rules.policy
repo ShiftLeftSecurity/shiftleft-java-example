@@ -17,8 +17,8 @@ TAG "CHECK" METHOD -f "io.shiftleft.controller.AdminController.isAdmin:boolean(j
 
 ### Suppress the info method since the application do not log info messages in production
 
-IO trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String)" { PAR -i 1 "SINK" }
-IO trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK" }
-IO trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK", PAR -i 3 "SINK" }
-IO trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object[])" { PAR -i 1 "SINK", PAR -i 2 "SINK" }
-IO trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Throwable)" { PAR -i 1 "SINK" }
+TRANSFORM trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String)" { PAR -i 1 "SINK" }
+TRANSFORM trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK" }
+TRANSFORM trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK", PAR -i 3 "SINK" }
+TRANSFORM trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object[])" { PAR -i 1 "SINK", PAR -i 2 "SINK" }
+TRANSFORM trustedlog = METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Throwable)" { PAR -i 1 "SINK" }
