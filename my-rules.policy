@@ -1,0 +1,16 @@
+IMPORT io.shiftleft/default
+IMPORT io.shiftleft/defaultdict
+
+### These methods are approved by AppSec ###
+
+### TAG "CHECK" METHOD - This prefix indicates that the method is an approved validation method
+
+### Pass the full name after -f using the below syntax
+### Package name . Class name . Method name : Return type ( Argument type )
+# Package name: io.shiftleft.controller
+# Class name: AdminController
+# Method name: isAdmin
+# Return type: boolean
+# Arguments: String (Expressed as java.lang.String in full form)
+
+TAG "CHECK" METHOD -f "io.shiftleft.controller.AdminController.isAdmin:boolean(java.lang.String)"

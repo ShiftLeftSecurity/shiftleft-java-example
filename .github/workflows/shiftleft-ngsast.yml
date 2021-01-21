@@ -1,7 +1,7 @@
 ---
 # This workflow integrates ShiftLeft NG SAST with GitHub
 # Visit https://docs.shiftleft.io for help
-name: ShiftLeft
+name: ShiftLeft NG SAST
 
 on:
   pull_request:
@@ -25,34 +25,7 @@ jobs:
       id: extract_branch
     - name: Build and Analyze
       run: |
-        TARGET_DIR=target
-        BUILT=0
-        POM_COUNT=$(find . -maxdepth 1 -type f -name "pom.xml" -not -path '*/\.git/*' | wc -l | tr -d " ")
-        GRADLE_COUNT=$(find . -maxdepth 1 -type f -name "build.gradle" -not -path '*/\.git/*' | wc -l | tr -d " ")
-        SBT_COUNT=$(find . -maxdepth 1 -type f -name "build.sbt" -not -path '*/\.git/*' | wc -l | tr -d " ")
-        if [ "$POM_COUNT" != "0" ]; then
           mvn compile package
-          BUILT=1
-        elif [ "$GRADLE_COUNT" != "0" ]; then
-          gradle jar
-          #./gradlew jar
-          TARGET_DIR=build
-          BUILT=1
-        elif [ "$SBT_COUNT" != "0" ]; then
-          echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-          curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
-          sudo apt update -y
-          sudo apt-get install sbt -y
-          sbt package
-          BUILT=1
-        fi
-        if [ "$BUILT" = "1" ] && [ -d "$TARGET_DIR" ]; then
-          jar cvf app.jar -C $TARGET_DIR .
-          ${GITHUB_WORKSPACE}/sl analyze --wait --app $(basename $(pwd)) --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --java --cpg app.jar
-        else
-          echo "Unable to build the project automatically. Please follow the instructions in our documentation to setup this project - https://docs.shiftleft.io/ngsast/analyzing-applications/java"  
-        fi
+          ${GITHUB_WORKSPACE}/sl analyze --wait --policy 2c089ac1-3378-44d5-94da-9507e84351c3/javarules:latest --app $(basename $(pwd)) --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --java --cpg target/hello-shiftleft-0.0.1.jar
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
-        SL_CPG_OPTS: "-J-Xms2g -J-Xmx7g"
-        SHIFTLEFT_JAVA_OPTS: "-Xms2g -Xmx7g"
