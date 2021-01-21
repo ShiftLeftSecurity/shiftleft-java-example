@@ -15,10 +15,6 @@ IMPORT io.shiftleft/defaultdict
 
 TAG "CHECK" METHOD -f "io.shiftleft.controller.AdminController.isAdmin:boolean(java.lang.String)"
 
-### Suppress the info method since the application do not log info messages in production
+### Suppress the log methods
 
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String)"
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object)"
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object,java.lang.Object)"
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object[])"
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Throwable)"
+HIDE IO log
