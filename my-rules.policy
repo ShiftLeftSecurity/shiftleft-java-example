@@ -18,5 +18,5 @@ TAG "CHECK" METHOD -f "io.shiftleft.controller.AdminController.isAdmin:boolean(j
 ### Suppress the info method since the application do not log info messages in production
 
 NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String)"
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String, java.lang.Object)"
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String, java.lang.Object, java.lang.Object)"
+NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object)"
+NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object,java.lang.Object)"
