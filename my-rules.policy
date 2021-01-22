@@ -22,3 +22,59 @@ IMPORT io.shiftleft/fileRead
 IMPORT io.shiftleft/sessionInject
 
 TAG "CHECK" METHOD -f "io.shiftleft.controller.AdminController.isAdmin:boolean(java.lang.String)"
+
+CONCLUSION xss-to-header = FLOW IO (http OR $http) -> IO (httpHeader)
+WHEN CONCLUSION xss-to-header => EMIT {
+     title: "XSS: HTTP data to header {{via `$paramname`}} {{in `$methodname`}}",
+     category: "a7-XSS",
+     description: "Data from HTTP request parameters is stored in HTTP headers. Unless the string is validated, this may result in a XSS attack.
+
+
+## Countermeasures
+
+This vulnerability can be prevented by using input sanitization/validation techniques (e.g., whitelisting) on the HTTP data before using it inside another HTTP header.
+
+## Internal help
+
+Visit the slack channel #team-xss to learn more about XSS. We have a wealth of resources in our [Confluence page](http://example.com) on XSS.
+
+## Additional information
+
+**[CWE-79](https://cwe.mitre.org/data/definitions/79.html)**
+
+**[OWASP-A7](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS))**",
+     score: "8.0",
+     vulnerability_description: "XSS",
+     owasp_link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
+     link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
+     cwe_link: "https://cwe.mitre.org/data/definitions/79.html"
+}
+
+
+CONCLUSION xss-to-html = FLOW IO (http) -> DATA (NOT encrypted AND NOT hashed AND NOT escaped AND NOT encoded) -> IO (html AND NOT session)
+WHEN CONCLUSION xss-to-html => EMIT {
+     title: "XSS: HTTP data to HTML {{via `$paramname`}} {{in `$methodname`}}",
+     category: "a7-XSS",
+     description: "Data from HTTP request parameters is used in HTML or session information. Unless the string is validated, this may result in a XSS attack.
+
+
+## Countermeasures
+
+This vulnerability can be prevented by using input sanitization/validation techniques (e.g., whitelisting) on the HTTP data before using it inside another HTTP header.
+
+## Internal help
+
+Visit the slack channel #team-xss to learn more about XSS. We have a wealth of resources in our [Confluence page](http://example.com) on XSS.
+
+## Additional information
+
+**[CWE-79](https://cwe.mitre.org/data/definitions/79.html)**
+
+**[OWASP-A7](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS))**",
+     score: "8.0",
+     vulnerability_description: "XSS",
+     owasp_link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
+     link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
+     cwe_link: "https://cwe.mitre.org/data/definitions/79.html"
+}
+
