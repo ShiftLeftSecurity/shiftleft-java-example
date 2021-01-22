@@ -40,7 +40,7 @@ Every sink such as HTTP and process call-outs should be reviewed and approved by
 
 **[OWASP-A7](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS))**",
      score: "1.0",
-     vulnerability_description: "Exposed Route",
+     vulnerability_description: "Exit Points",
      owasp_link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
      link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
      cwe_link: "https://cwe.mitre.org/data/definitions/79.html"
