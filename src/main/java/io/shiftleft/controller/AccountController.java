@@ -5,6 +5,12 @@ import io.shiftleft.model.Account;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import io.shiftleft.repository.AccountRepository;
 
 import org.slf4j.Logger;
@@ -21,6 +27,15 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
     @Autowired
     private AccountRepository accountRepository;
+    
+    private Connection connection;
+    private PreparedStatement preparedStatement;
+    private ResultSet resultSet;
+
+    private void getConnection() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.jdbc.Driver");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost/DBPROD", "admin", "1234");
+    }
 
     private static Logger log = LoggerFactory.getLogger(DataLoader.class);
     
@@ -39,8 +54,31 @@ public class AccountController {
     }
 
     @GetMapping("/account/{accountId}")
-    public Account getAccount(@PathVariable long accountId) {
+    public Account getAccount(@PathVariable long accountId) throws SQLException {
         log.info("Account Data is {}", this.accountRepository.findOne(1l).toString());
+
+        try {    
+            getConnection();
+
+            String sql = "SELECT * FROM ACCOUNT WHERE ACCOUNTID = '" + accountId;
+
+            // Here prepareStatement is not effective as the concatenation of string has already happened above.
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                long accountNumber = resultSet.getObject("number") != null ? resultSet.getLong("number") : null;
+                double balance = resultSet.getObject("balance") != null ? resultSet.getDouble("balance") : null;
+                double interest = resultSet.getObject("interest") != null ? resultSet.getDouble("interest") : null;
+                log.info("Balance for account number " + accountNumber + " is $" + balance);
+            } else {
+                log.info("Account ID" + accountId + " does not exist!");
+            }
+        } 
+        catch (Exception e) {
+            throw new SQLException(e);
+        }
+
         return this.accountRepository.findOne(accountId);
     }
 
