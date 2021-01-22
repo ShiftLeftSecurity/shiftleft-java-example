@@ -29,8 +29,6 @@ WHEN CONCLUSION xss-to-header => EMIT {
      category: "a7-XSS",
      description: "Data from HTTP request parameters is stored in HTTP headers. Unless the string is validated, this may result in a XSS attack.
 
-![XSS](https://portswigger.net/web-security/images/cross-site-scripting.svg)
-
 ## Countermeasures
 
 This vulnerability can be prevented by using input sanitization/validation techniques (e.g., whitelisting) on the HTTP data before using it inside another HTTP header.
@@ -62,8 +60,6 @@ WHEN CONCLUSION xss-to-html => EMIT {
      title: "XSS: HTTP data to HTML {{via `$paramname`}} {{in `$methodname`}}",
      category: "a7-XSS",
      description: "Data from HTTP request parameters is used in HTML or session information. Unless the string is validated, this may result in a XSS attack.
-
-![XSS](https://portswigger.net/web-security/images/cross-site-scripting.svg)
 
 ## Countermeasures
 
