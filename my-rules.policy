@@ -1,6 +1,4 @@
 IMPORT io.shiftleft/default
 IMPORT io.shiftleft/defaultdict
 
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String)"
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object)"
-NOP METHOD -f "org.slf4j.Logger.info:void(java.lang.String,java.lang.Object,java.lang.Object)"
+HIDE IO log
