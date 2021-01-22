@@ -24,7 +24,7 @@ Every source such as HTTP route should be reviewed and approved by AppSec as per
 }
 
 
-CONCLUSION exit-calls = FLOW IO (execute OR cloud OR network OR connect OR deserialization OR registry OR file OR http OR $http OR filePath OR ftp OR $file OR mail OR xmlwrite OR xpath OR mustacheTemplate OR xml) -> IO (execute OR cloud OR network OR connect OR deserialization OR registry OR file OR http OR $http OR filePath OR ftp OR $file OR mail OR xmlwrite OR xpath OR mustacheTemplate OR xml)
+CONCLUSION exit-calls = FLOW DATA (NOT encrypted) -> IO (execute OR cloud OR network OR connect OR deserialization OR registry OR file OR http OR $http OR filePath OR ftp OR $file OR mail OR xmlwrite OR xpath OR mustacheTemplate OR xml)
 WHEN CONCLUSION exit-calls => EMIT {
      title: "Exit Points {{`$methodname`}}",
      category: "Exit Points",
