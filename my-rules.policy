@@ -29,9 +29,23 @@ WHEN CONCLUSION xss-to-header => EMIT {
      category: "a7-XSS",
      description: "Data from HTTP request parameters is stored in HTTP headers. Unless the string is validated, this may result in a XSS attack.
 
-## Countermeasures
+## Reflected XSS
 
-This vulnerability can be prevented by using input sanitization/validation techniques (e.g., whitelisting) on the HTTP data before using it inside another HTTP header.
+Here is a simple example of a reflected XSS vulnerability:
+
+```
+https://insecure-website.com/status?message=All+is+well.
+
+<p>Status: All is well.</p>
+```
+
+The application doesn't perform any other processing of the data, so an attacker can easily construct an attack like this:
+
+```
+https://insecure-website.com/status?message=<script>/*+Bad+stuff+here...+*/</script>
+
+<p>Status: <script>/* Bad stuff here... */</script></p>
+```
 
 ## How to prevent XSS attacks?
 
@@ -61,9 +75,23 @@ WHEN CONCLUSION xss-to-html => EMIT {
      category: "a7-XSS",
      description: "Data from HTTP request parameters is used in HTML or session information. Unless the string is validated, this may result in a XSS attack.
 
-## Countermeasures
+## Reflected XSS
 
-This vulnerability can be prevented by using input sanitization/validation techniques (e.g., whitelisting) on the HTTP data before using it inside another HTTP header.
+Here is a simple example of a reflected XSS vulnerability:
+
+```
+https://insecure-website.com/status?message=All+is+well.
+
+<p>Status: All is well.</p>
+```
+
+The application doesn't perform any other processing of the data, so an attacker can easily construct an attack like this:
+
+```
+https://insecure-website.com/status?message=<script>/*+Bad+stuff+here...+*/</script>
+
+<p>Status: <script>/* Bad stuff here... */</script></p>
+```
 
 ## How to prevent XSS attacks?
 
@@ -73,6 +101,8 @@ In general, effectively preventing XSS vulnerabilities is likely to involve a co
 - Encode data on output. At the point where user-controllable data is output in HTTP responses, encode the output to prevent it from being interpreted as active content. Depending on the output context, this might require applying combinations of HTML, URL, JavaScript, and CSS encoding.
 - Use appropriate response headers. To prevent XSS in HTTP responses that aren't intended to contain any HTML or JavaScript, you can use the Content-Type and X-Content-Type-Options headers to ensure that browsers interpret the responses in the way you intend.
 - Content Security Policy. As a last line of defense, you can use Content Security Policy (CSP) to reduce the severity of any XSS vulnerabilities that still occur.
+
+## How to prevent XSS attacks?
 
 ## Additional information
 
