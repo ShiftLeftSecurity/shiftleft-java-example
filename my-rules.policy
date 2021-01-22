@@ -3,7 +3,7 @@ IMPORT io.shiftleft/defaultdict
 
 CONCLUSION http-routes = FLOW IO (http OR $http) -> IO (html)
 WHEN CONCLUSION http-routes => EMIT {
-     title: "HTTP Route: {{`$methodname`}}",
+     title: "HTTP Route {{`$methodname`}}",
      category: "Exposed Route",
      description: "This is an HTTP route a source of entry for this application. Check if this route was created intentionally by the developer.
 
@@ -12,6 +12,29 @@ WHEN CONCLUSION http-routes => EMIT {
 Every source such as HTTP route should be reviewed and approved by AppSec as per the [security standards](https://example.com) defined here.
 
 **DO NOT CREATE** new routes in your applications without an approved Threat Model.
+
+## Additional information
+
+**[OWASP-A7](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS))**",
+     score: "1.0",
+     vulnerability_description: "Exposed Route",
+     owasp_link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
+     link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
+     cwe_link: "https://cwe.mitre.org/data/definitions/79.html"
+}
+
+
+CONCLUSION exit-calls = FLOW IO (execute OR cloud OR network OR connect OR deserialization OR registry OR file OR http OR $http OR filePath OR ftp OR $file OR mail OR xmlwrite OR xpath OR mustacheTemplate OR xml) -> IO (execute OR cloud OR network OR connect OR deserialization OR registry OR file OR http OR $http OR filePath OR ftp OR $file OR mail OR xmlwrite OR xpath OR mustacheTemplate OR xml)
+WHEN CONCLUSION exit-calls => EMIT {
+     title: "Exit Points {{`$methodname`}}",
+     category: "Exit Points",
+     description: "This is an Exit Point from this application (sys-call, compiler assembly call, network, memory based). Check if this exit point was created intentionally by the developer.
+
+## Internal Help
+
+Every sink such as HTTP and process call-outs should be reviewed and approved by AppSec as per the [security standards](https://example.com) defined here.
+
+**DO NOT CREATE** new Exit Points in your applications without an approved Threat Model.
 
 ## Additional information
 
