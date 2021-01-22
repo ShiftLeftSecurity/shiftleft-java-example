@@ -1,4 +1,24 @@
 IMPORT io.shiftleft/default
 IMPORT io.shiftleft/defaultdict
 
-HIDE IO log
+CONCLUSION http-routes = FLOW IO (http OR $http) -> IO (html)
+WHEN CONCLUSION http-routes => EMIT {
+     title: "HTTP Route: {{`$methodname`}}",
+     category: "Exposed Route",
+     description: "This is an HTTP route a source of entry for this application. Check if this route was created intentionally by the developer.
+
+## Internal Help
+
+Every source such as HTTP route should be reviewed and approved by AppSec as per the [security standards](https://example.com) defined here.
+
+**DO NOT CREATE** new routes in your applications without an approved Threat Model.
+
+## Additional information
+
+**[OWASP-A7](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS))**",
+     score: "1.0",
+     vulnerability_description: "Exposed Route",
+     owasp_link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
+     link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
+     cwe_link: "https://cwe.mitre.org/data/definitions/79.html"
+}
