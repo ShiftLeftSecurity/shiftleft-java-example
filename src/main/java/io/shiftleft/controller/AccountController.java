@@ -61,6 +61,8 @@ public class AccountController {
             getConnection();
 
             String sql = "SELECT * FROM ACCOUNT WHERE ACCOUNTID = '" + accountId;
+
+            // Here prepareStatement is not effective as the concatenation of string has already happened above.
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
 
