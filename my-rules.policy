@@ -7,7 +7,7 @@ IO debugRoute = METHOD -a r"io\.shiftleft\.controller\..*Controller\..*debug.*"
 
 ## Create a conclusion that checks for the flow of private data without the audit method
 
-CONCLUSION debug-route-use = FLOW IO (http) -> IO (debugRoute)
+CONCLUSION debug-route-use = FLOW IO (debugRoute) -> IO (html)
 
 WHEN CONCLUSION debug-route-use => EMIT {
   title: "Debug Route: Debug route is exposed {{via `$paramname`}} publicly {{in `$methodname`}}",
