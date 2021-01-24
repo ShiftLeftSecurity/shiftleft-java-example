@@ -3,11 +3,11 @@ IMPORT io.shiftleft/defaultdict
 
 ## Add a new debug tag for the debug methods
 
-IO debugRoute = METHOD -f r"io\.shiftleft\.controller.*debug.*"
+IO debugRoute = METHOD -f "io.shiftleft.controller.CustomerController.debug:java.lang.String(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,javax.servlet.http.HttpServletResponse,org.springframework.web.context.request.WebRequest)" {RET  "SINK", PAR -i 1 "SOURCE",PAR -i 2 "SOURCE",PAR -i 3 "SOURCE",PAR -i 4 "SOURCE",PAR -i 5 "SOURCE",PAR -i 6 "SOURCE",PAR -i 7 "SOURCE",PAR -i 8 "SOURCE",PAR -i 8 "SOURCE"}
 
 ## Create a conclusion that checks for the flow of private data without the audit method
 
-CONCLUSION debug-route-use = FLOW IO (debugRoute) -> IO (html)
+CONCLUSION debug-route-use = FLOW IO (debugRoute) -> IO (debugRoute)
 
 WHEN CONCLUSION debug-route-use => EMIT {
   title: "Debug Route: Debug route is exposed {{via `$paramname`}} publicly {{in `$methodname`}}",
