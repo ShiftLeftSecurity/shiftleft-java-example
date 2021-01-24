@@ -1,47 +1,36 @@
 IMPORT io.shiftleft/default
 IMPORT io.shiftleft/defaultdict
 
-CONCLUSION http-routes = FLOW IO (http OR $http) -> IO (html)
-WHEN CONCLUSION http-routes => EMIT {
-     title: "HTTP Route {{`$methodname`}}",
-     category: "Exposed Route",
-     description: "This is an HTTP route a source of entry for this application. Check if this route was created intentionally by the developer.
+IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String)" { PAR -i 1 "SINK" }
+IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK" }
+IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String,java.lang.Object,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK", PAR -i 3 "SINK" }
+
+CONCLUSION unaudited-data-use = FLOW DATA (payment-data OR location OR account-info OR pii OR medical) -> IO (NOT audited)
+
+WHEN CONCLUSION unaudited-data-use => EMIT {
+  title: "Unaudited: Customer data is used {{via `$paramname`}} without audit {{in `$methodname`}}",
+  description: "Customer data is used by the application with out an audit log to identify the user accessing the data. This is required as per compliance standards.
 
 ## Internal Help
 
-Every source such as HTTP route should be reviewed and approved by AppSec as per the [security standards](https://example.com) defined here.
+As per SOC2 standards, all uses of private data should be logged for audit purposes. The audit log entry should contain the id of the user accessing the customer information along with other parameters. Refer to this [internal document](https://example.com) to learn more.
 
-**DO NOT CREATE** new routes in your applications without an approved Threat Model.
+## Countermeasures
 
-## Additional information
-
-**[OWASP-A7](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS))**",
-     score: "1.0",
-     vulnerability_description: "Exposed Route",
-     owasp_link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
-     link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
-     cwe_link: "https://cwe.mitre.org/data/definitions/79.html"
-}
-
-
-CONCLUSION exit-calls = FLOW DATA (NOT encrypted) -> IO (execute OR cloud OR network OR connect OR deserialization OR registry OR file OR http OR $http OR filePath OR ftp OR $file OR mail OR xmlwrite OR xpath OR mustacheTemplate OR xml)
-WHEN CONCLUSION exit-calls => EMIT {
-     title: "Exit Points {{`$methodname`}}",
-     category: "Exit Points",
-     description: "This is an Exit Point from this application (sys-call, compiler assembly call, network, memory based). Check if this exit point was created intentionally by the developer.
-
-## Internal Help
-
-Every sink such as HTTP and process call-outs should be reviewed and approved by AppSec as per the [security standards](https://example.com) defined here.
-
-**DO NOT CREATE** new Exit Points in your applications without an approved Threat Model.
+This vulnerability can be prevented by using the approved audit functions in your application.
 
 ## Additional information
 
-**[OWASP-A7](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS))**",
-     score: "1.0",
-     vulnerability_description: "Exit Points",
-     owasp_link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
-     link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)",
-     cwe_link: "https://cwe.mitre.org/data/definitions/79.html"
+**[CWE-200](https://cwe.mitre.org/data/definitions/200.html)**
+
+**[CWE-117](https://cwe.mitre.org/data/definitions/117.html)**
+
+**[OWASP-A3](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A3-Sensitive_Data_Exposure)**",
+  category: "a3-sensitive-data-exposure",
+  score: "8.0",
+  vulnerability_description: "Sensitive Data Leak",
+  owasp_link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A3-Sensitive_Data_Exposure",
+  link: "https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A3-Sensitive_Data_Exposure",
+  cwe_link: "https://cwe.mitre.org/data/definitions/200.html",
+  cwe_link: "https://cwe.mitre.org/data/definitions/117.html"
 }
