@@ -1,27 +1,25 @@
 IMPORT io.shiftleft/default
 IMPORT io.shiftleft/defaultdict
 
-## Add a new audited tag for the warn methods
+## Add a new debug tag for the debug methods
 
-IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String)" { PAR -i 1 "SINK" }
-IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK" }
-IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String,java.lang.Object,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK", PAR -i 3 "SINK" }
+IO debugRoute = METHOD -a r"io\.shiftleft\.controller\..*Controller\..*debug.*" { RET "SINK" }
 
 ## Create a conclusion that checks for the flow of private data without the audit method
 
-CONCLUSION unaudited-data-use = FLOW IO (http) -> DATA (payment-data OR location OR account-info OR pii OR medical) -> IO (NOT audited)
+CONCLUSION unaudited-data-use = FLOW IO (http) -> IO (debugRoute)
 
-WHEN CONCLUSION unaudited-data-use => EMIT {
-  title: "Unaudited: Customer data is used {{via `$paramname`}} without audit {{in `$methodname`}}",
-  description: "Customer data is used by the application with out an audit log to identify the user accessing the data. This is required as per compliance standards.
+WHEN CONCLUSION debug-route-use => EMIT {
+  title: "Debug Route: Debug route is exposed {{via `$paramname`}} publicly {{in `$methodname`}}",
+  description: "The application is exposing a debug endpoint publicly.
 
 ## Internal Help
 
-As per SOC2 standards, all uses of private data should be logged for audit purposes. The audit log entry should contain the id of the user accessing the customer information along with other parameters. Refer to this [internal document](https://example.com) to learn more.
+As per SOC2 standards, no debug endpoints should be exposed publicly. Refer to this [internal document](https://example.com) to learn more.
 
 ## Countermeasures
 
-This vulnerability can be prevented by using the approved audit functions in your application.
+This vulnerability can be prevented by removing the debug route from your application.
 
 ## Additional information
 
@@ -31,7 +29,7 @@ This vulnerability can be prevented by using the approved audit functions in you
 **[OWASP-A3](https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A3-Sensitive_Data_Exposure)**",
   category: "a10-insufficient-logging",
   score: "8.0",
-  vulnerability_description: "Insufficient Logging",
+  vulnerability_description: "Exposed Debug Route",
   owasp_link: "https://owasp.org/www-project-top-ten/2017/A10_2017-Insufficient_Logging%2526Monitoring",
   link: "https://owasp.org/www-project-top-ten/2017/A10_2017-Insufficient_Logging%2526Monitoring",
   cwe_link: "https://cwe.mitre.org/data/definitions/223.html"
