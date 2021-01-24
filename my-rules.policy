@@ -3,7 +3,7 @@ IMPORT io.shiftleft/defaultdict
 
 ## Add a new debug tag for the debug methods
 
-IO debugRoute = METHOD -f r"io\.shiftleft\.controller\..*Controller\..*debug.*"
+IO debugRoute = METHOD -f r"io\.shiftleft\.controller.*debug.*"
 
 ## Create a conclusion that checks for the flow of private data without the audit method
 
