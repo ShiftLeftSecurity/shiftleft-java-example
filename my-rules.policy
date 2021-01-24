@@ -1,11 +1,15 @@
 IMPORT io.shiftleft/default
 IMPORT io.shiftleft/defaultdict
 
+## Add a new audited tag for the warn methods
+
 IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String)" { PAR -i 1 "SINK" }
 IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK" }
 IO audited = METHOD -f "org.slf4j.Logger.warn:void(java.lang.String,java.lang.Object,java.lang.Object)" { PAR -i 1 "SINK", PAR -i 2 "SINK", PAR -i 3 "SINK" }
 
-CONCLUSION unaudited-data-use = FLOW DATA (payment-data OR location OR account-info OR pii OR medical) -> IO (NOT audited)
+## Create a conclusion that checks for the flow of private data without the audit method
+
+CONCLUSION unaudited-data-use = FLOW IO (http) -> DATA (payment-data OR location OR account-info OR pii OR medical) -> IO (NOT audited)
 
 WHEN CONCLUSION unaudited-data-use => EMIT {
   title: "Unaudited: Customer data is used {{via `$paramname`}} without audit {{in `$methodname`}}",
