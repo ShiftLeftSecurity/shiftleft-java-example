@@ -26,6 +26,6 @@ jobs:
     - name: Build and Analyze
       run: |
           mvn compile package
-          ${GITHUB_WORKSPACE}/sl analyze --wait --policy 2c089ac1-3378-44d5-94da-9507e84351c3/javarules:latest --force --vcs-prefix-correction "/io/shiftleft=/src/main/java" --app java-policy-exercise --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --java --cpg target/hello-shiftleft-0.0.1.jar
+          ${GITHUB_WORKSPACE}/sl analyze --wait --policy 2c089ac1-3378-44d5-94da-9507e84351c3/javarules:latest --force --vcs-prefix-correction "/io/shiftleft=/src/main/java" --app java-policy-exercise1 --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --java --cpg target/hello-shiftleft-0.0.1.jar
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
