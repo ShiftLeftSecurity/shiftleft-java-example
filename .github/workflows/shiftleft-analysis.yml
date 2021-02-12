@@ -10,16 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Maven compile and package
+      run: mvn compile package   
     - name: Perform NG SAST Analysis
       run: |
-        docker run -e WORKSPACE -e GITHUB_TOKEN -e SCAN_AUTO_BUILD -v /github/workspace:/app shiftleft/scan-java scan --src /app --type java
+        docker run -e WORKSPACE -e GITHUB_TOKEN \
+          -e SHIFTLEFT_ORG_ID -e SHIFTLEFT_ACCESS_TOKEN -e SHIFTLEFT_API_TOKEN \
+          -v /github/workspace:/app shiftleft/scan-java scan --src /app --type java
       env:
         WORKSPACE: ""
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SCAN_AUTO_BUILD: true
         SHIFTLEFT_ORG_ID: ${{ secrets.SHIFTLEFT_ORG_ID }}
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
-
+        SHIFTLEFT_API_TOKEN: ${{ secrets.SHIFTLEFT_API_TOKEN }}
     - name: Upload report
       uses: github/codeql-action/upload-sarif@v1
       with:
