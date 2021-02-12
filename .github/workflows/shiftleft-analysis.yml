@@ -16,7 +16,7 @@ jobs:
       run: |
         docker run -e WORKSPACE -e GITHUB_TOKEN \
           -e SHIFTLEFT_ORG_ID -e SHIFTLEFT_ACCESS_TOKEN -e SHIFTLEFT_API_TOKEN \
-          -v ${GITHUB_WORKSPACE}:/app shiftleft/scan-java scan --src /app --type java
+          -v ${GITHUB_WORKSPACE}:/app shiftleft/scan-java scan --no-error --src /app --type java
       env:
         WORKSPACE: ""
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
