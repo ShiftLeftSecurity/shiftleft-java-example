@@ -27,7 +27,7 @@ jobs:
       run: |
           mvn compile package
           jar_name=`ls target/*.jar`
-          ${GITHUB_WORKSPACE}/sl analyze --wait --app $(basename $(pwd)) --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --vcs-prefix-correction "*:/src/main/java" --java --cpg $jar_name
+          ${GITHUB_WORKSPACE}/sl analyze --wait --app $(basename $(pwd)) --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --java --cpg $jar_name
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
         SL_CPG_OPTS: "-J-Xms2g -J-Xmx7g"
