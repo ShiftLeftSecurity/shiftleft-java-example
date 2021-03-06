@@ -1,7 +1,7 @@
 ---
-# This workflow integrates ShiftLeft NG SAST with GitHub
+# This workflow integrates ShiftLeft NG SAST with GitHub code scanning
 # Visit https://docs.shiftleft.io for help
-name: ShiftLeft
+name: ShiftLeft Code scanning
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   NextGen-Static-Analysis:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - name: Setup Java JDK
@@ -25,34 +25,26 @@ jobs:
       id: extract_branch
     - name: Build and Analyze
       run: |
-        TARGET_DIR=target
-        BUILT=0
-        POM_COUNT=$(find . -maxdepth 1 -type f -name "pom.xml" -not -path '*/\.git/*' | wc -l | tr -d " ")
-        GRADLE_COUNT=$(find . -maxdepth 1 -type f -name "build.gradle" -not -path '*/\.git/*' | wc -l | tr -d " ")
-        SBT_COUNT=$(find . -maxdepth 1 -type f -name "build.sbt" -not -path '*/\.git/*' | wc -l | tr -d " ")
-        if [ "$POM_COUNT" != "0" ]; then
           mvn compile package
-          BUILT=1
-        elif [ "$GRADLE_COUNT" != "0" ]; then
-          gradle jar
-          #./gradlew jar
-          TARGET_DIR=build
-          BUILT=1
-        elif [ "$SBT_COUNT" != "0" ]; then
-          echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-          curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
-          sudo apt update -y
-          sudo apt-get install sbt -y
-          sbt package
-          BUILT=1
-        fi
-        if [ "$BUILT" = "1" ] && [ -d "$TARGET_DIR" ]; then
-          jar cvf app.jar -C $TARGET_DIR .
-          ${GITHUB_WORKSPACE}/sl analyze --wait --app $(basename $(pwd)) --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --vcs-prefix-correction "*:/src/main/java" --java --cpg app.jar
-        else
-          echo "Unable to build the project automatically. Please follow the instructions in our documentation to setup this project - https://docs.shiftleft.io/ngsast/analyzing-applications/java"  
-        fi
+          jar_name=`ls target/*.jar`
+          ${GITHUB_WORKSPACE}/sl analyze --wait --app $(basename $(pwd)) --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --vcs-prefix-correction "*:/src/main/java" --java --cpg $jar_name
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
         SL_CPG_OPTS: "-J-Xms2g -J-Xmx7g"
         SHIFTLEFT_JAVA_OPTS: "-Xms2g -Xmx7g"
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    - name: Download findings using api and convert to sarif
+      run: |
+        curl -H "Authorization: Bearer ${SHIFTLEFT_ACCESS_TOKEN}" -L "https://www.shiftleft.io/api/v4/orgs/${SHIFTLEFT_ORG_ID}/apps/shiftleft-java-example/findings?per_page=249&type=secret&type=vuln&type=extscan" -o ${GITHUB_WORKSPACE}/reports/findings.json
+        sudo pip install joern2sarif
+        joern2sarif -t ng-sast -i ${GITHUB_WORKSPACE}/reports/findings.json -o ${GITHUB_WORKSPACE}/reports/ngsast-findings.sarif
+      env:
+        WORKSPACE: "src/main/java"
+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+        SHIFTLEFT_ORG_ID: ${{ secrets.SHIFTLEFT_ORG_ID }}
+    - name: Upload sarif
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: reports
