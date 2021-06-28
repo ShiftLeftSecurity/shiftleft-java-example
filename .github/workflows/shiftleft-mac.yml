@@ -1,4 +1,4 @@
-# This workflow integrates ShiftLeft Inspect with GitHub
+# This workflow integrates ShiftLeft with GitHub
 # Visit https://docs.shiftleft.io for help
 name: Analyze with ShiftLeft Inspect on Mac
 
