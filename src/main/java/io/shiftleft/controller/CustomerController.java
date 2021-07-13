@@ -1,5 +1,6 @@
 package io.shiftleft.controller;
 
+import com.thoughtworks.xstream.XStream;
 import io.shiftleft.model.Account;
 import io.shiftleft.model.Address;
 import java.io.BufferedReader;
@@ -80,6 +81,8 @@ public class CustomerController {
 	
 	private static Logger log = LoggerFactory.getLogger(CustomerController.class);
 
+	private XStream xstream;
+
 	@PostConstruct
 	public void init() {
 		log.info("Start Loading SalesForce Properties");
@@ -87,6 +90,7 @@ public class CustomerController {
 		log.info("UserName is {}", env.getProperty("sfdc.username"));
 		log.info("Password is {}", env.getProperty("sfdc.password"));
 		log.info("End Loading SalesForce Properties");
+		xstream = new XStream();
 	}
 
 	private void dispatchEventToSalesForce(String event)
@@ -302,8 +306,8 @@ public class CustomerController {
     httpResponse.setStatus(HttpStatus.CREATED.value());
     httpResponse.setHeader("Location", String.format("%s/customers/%s",
                            request.getContextPath(), customer1.getId()));
-
-    return customer1.toString().toLowerCase().replace("script","");
+	String cxml = xstream.toXML(customer1);
+    return customer1.toString().toLowerCase().replace("script","") + cxml;
   }
 
 	/**
