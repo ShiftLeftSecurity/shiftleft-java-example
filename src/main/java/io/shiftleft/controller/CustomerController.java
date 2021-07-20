@@ -129,7 +129,8 @@ public class CustomerController {
 	  Account account = new Account(4242l,1234, "savings", 1, 0);
 	  log.info("Account Data is {}", account);
 	  log.info("Customer Data is {}", customer);
-
+	  String cxml = xstream.toXML(customer);
+	  log.debug(cxml);
       try {
         dispatchEventToSalesForce(String.format(" Customer %s Logged into SalesForce", customer));
       } catch (Exception e) {
@@ -230,6 +231,7 @@ public class CustomerController {
       throw new Exception("cookie is incorrect");
     }
 
+
     String settingsCookie = request.getHeader("Cookie");
     String[] cookie = settingsCookie.split(",");
 	if(cookie.length<2) {
@@ -306,8 +308,7 @@ public class CustomerController {
     httpResponse.setStatus(HttpStatus.CREATED.value());
     httpResponse.setHeader("Location", String.format("%s/customers/%s",
                            request.getContextPath(), customer1.getId()));
-	String cxml = xstream.toXML(customer1);
-    return customer1.toString().toLowerCase().replace("script","") + cxml;
+    return customer1.toString().toLowerCase().replace("script","");
   }
 
 	/**
