@@ -1,5 +1,6 @@
 package io.shiftleft.controller;
 
+import com.thoughtworks.xstream.XStream;
 import io.shiftleft.model.Account;
 import io.shiftleft.model.Address;
 import java.io.BufferedReader;
@@ -72,68 +73,76 @@ import org.springframework.web.util.HtmlUtils;
 @RestController
 public class CustomerController {
 
-	@Autowired
-	private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
-	@Autowired
-	Environment env;
-	
-	private static Logger log = LoggerFactory.getLogger(CustomerController.class);
+    @Autowired
+    Environment env;
 
-	@PostConstruct
-	public void init() {
-		log.info("Start Loading SalesForce Properties");
-		log.info("Url is {}", env.getProperty("sfdc.url"));
-		log.info("UserName is {}", env.getProperty("sfdc.username"));
-		log.info("Password is {}", env.getProperty("sfdc.password"));
-		log.info("End Loading SalesForce Properties");
-	}
+    private static Logger log = LoggerFactory.getLogger(CustomerController.class);
 
-	private void dispatchEventToSalesForce(String event)
-			throws ClientProtocolException, IOException, AuthenticationException {
-		CloseableHttpClient client = HttpClients.createDefault();
-		HttpPost httpPost = new HttpPost(env.getProperty("sfdc.url"));
-		httpPost.setEntity(new StringEntity(event));
-		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(env.getProperty("sfdc.username"),
-				env.getProperty("sfdc.password"));
-		httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
+    private XStream xstream;
 
-		CloseableHttpResponse response = client.execute(httpPost);
-		log.info("Response from SFDC is {}", response.getStatusLine().getStatusCode());
-		client.close();
-	}
+    @PostConstruct
+    public void init() {
+        log.info("Start Loading SalesForce Properties");
+        log.info("Url is {}", env.getProperty("sfdc.url"));
+        log.info("UserName is {}", env.getProperty("sfdc.username"));
+        log.info("Password is {}", env.getProperty("sfdc.password"));
+        log.info("End Loading SalesForce Properties");
+        xstream = new XStream();
+        xstream.setMode(XStream.XPATH_ABSOLUTE_REFERENCES);
+    }
 
-	/**
-	 * Get customer using id. Returns HTTP 404 if customer not found
-	 *
-	 * @param customerId
-	 * @return retrieved customer
-	 */
-	@RequestMapping(value = "/customers/{customerId}", method = RequestMethod.GET)
-	public Customer getCustomer(@PathVariable("customerId") Long customerId) {
+    private void dispatchEventToSalesForce(String event)
+            throws ClientProtocolException, IOException, AuthenticationException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(env.getProperty("sfdc.url"));
+        httpPost.setEntity(new StringEntity(event));
+        UsernamePasswordCredentials creds = new UsernamePasswordCredentials(env.getProperty("sfdc.username"),
+                env.getProperty("sfdc.password"));
+        httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
 
-		/* validate customer Id parameter */
-      if (null == customerId) {
-        throw new InvalidCustomerRequestException();
-      }
+        CloseableHttpResponse response = client.execute(httpPost);
+        log.info("Response from SFDC is {}", response.getStatusLine().getStatusCode());
+        client.close();
+    }
 
-      Customer customer = customerRepository.findOne(customerId);
-		if (null == customer) {
-		  throw new CustomerNotFoundException();
-	  }
+    /**
+     * Get customer using id. Returns HTTP 404 if customer not found
+     *
+     * @param customerId
+     * @return retrieved customer
+     */
+    @RequestMapping(value = "/customers/{customerId}", method = RequestMethod.GET)
+    public Customer getCustomer(@PathVariable("customerId") Long customerId) {
 
-	  Account account = new Account(4242l,1234, "savings", 1, 0);
-	  log.info("Account Data is {}", account);
-	  log.info("Customer Data is {}", customer);
+        /* validate customer Id parameter */
+        if (null == customerId) {
+            throw new InvalidCustomerRequestException();
+        }
 
-      try {
-        dispatchEventToSalesForce(String.format(" Customer %s Logged into SalesForce", customer));
-      } catch (Exception e) {
-        log.error("Failed to Dispatch Event to SalesForce . Details {} ", e.getLocalizedMessage());
+        Customer customer = customerRepository.findOne(customerId);
+        if (null == customer) {
+            throw new CustomerNotFoundException();
+        }
 
-      }
+        Account account = new Account(4242l,1234, "savings", 1, 0);
+        String cxml = xstream.toXML(customer);
+        log.debug(cxml);
+        String axml = xstream.toXML(account);
+        log.debug(axml);
 
-      return customer;
+        log.info("Account Data is {}", account);
+        log.info("Customer Data is {}", customer);
+        try {
+            dispatchEventToSalesForce(String.format(" Customer %s Logged into SalesForce", customer));
+        } catch (Exception e) {
+            log.error("Failed to Dispatch Event to SalesForce . Details {} ", e.getLocalizedMessage());
+
+        }
+
+        return customer;
     }
 
     /**
@@ -143,258 +152,258 @@ public class CustomerController {
      * @return
      * @throws IOException
      */
-      @RequestMapping(value = "/", method = RequestMethod.GET)
-      public String index(HttpServletResponse httpResponse, WebRequest request) throws IOException {
-	  	ClassPathResource cpr = new ClassPathResource("static/index.html");
-	  	String ret = "";
-		  try {
-			  byte[] bdata = FileCopyUtils.copyToByteArray(cpr.getInputStream());
-			  ret= new String(bdata, StandardCharsets.UTF_8);
-		  } catch (IOException e) {
-			  //LOG.warn("IOException", e);
-		  }
-		  return ret;
-      }
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String index(HttpServletResponse httpResponse, WebRequest request) throws IOException {
+        ClassPathResource cpr = new ClassPathResource("static/index.html");
+        String ret = "";
+        try {
+            byte[] bdata = FileCopyUtils.copyToByteArray(cpr.getInputStream());
+            ret= new String(bdata, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            //LOG.warn("IOException", e);
+        }
+        return ret;
+    }
 
-      /**
-       * Check if settings= is present in cookie
-       * @param request
-       * @return
-       */
-      private boolean checkCookie(WebRequest request) throws Exception {
-      	try {
-			return request.getHeader("Cookie").startsWith("settings=");
-		}
-		catch (Exception ex)
-		{
-			System.out.println(ex.getMessage());
-		}
-		return false;
-      }
+    /**
+     * Check if settings= is present in cookie
+     * @param request
+     * @return
+     */
+    private boolean checkCookie(WebRequest request) throws Exception {
+        try {
+            return request.getHeader("Cookie").startsWith("settings=");
+        }
+        catch (Exception ex)
+        {
+            System.out.println(ex.getMessage());
+        }
+        return false;
+    }
 
-      /**
-       * restores the preferences on the filesystem
-       *
-       * @param httpResponse
-       * @param request
-       * @throws Exception
-       */
-      @RequestMapping(value = "/loadSettings", method = RequestMethod.GET)
-      public void loadSettings(HttpServletResponse httpResponse, WebRequest request) throws Exception {
+    /**
+     * restores the preferences on the filesystem
+     *
+     * @param httpResponse
+     * @param request
+     * @throws Exception
+     */
+    @RequestMapping(value = "/loadSettings", method = RequestMethod.GET)
+    public void loadSettings(HttpServletResponse httpResponse, WebRequest request) throws Exception {
         // get cookie values
         if (!checkCookie(request)) {
-          httpResponse.getOutputStream().println("Error");
-          throw new Exception("cookie is incorrect");
+            httpResponse.getOutputStream().println("Error");
+            throw new Exception("cookie is incorrect");
         }
         String md5sum = request.getHeader("Cookie").substring("settings=".length(), 41);
-    	ClassPathResource cpr = new ClassPathResource("static");
-    	File folder = new File(cpr.getPath());
-		File[] listOfFiles = folder.listFiles();
+        ClassPathResource cpr = new ClassPathResource("static");
+        File folder = new File(cpr.getPath());
+        File[] listOfFiles = folder.listFiles();
         String filecontent = new String();
         for (File f : listOfFiles) {
-          // not efficient, i know
-          filecontent = new String();
-          byte[] encoded = Files.readAllBytes(f.toPath());
-          filecontent = new String(encoded, StandardCharsets.UTF_8);
-          if (filecontent.contains(md5sum)) {
-            // this will send me to the developer hell (if exists)
+            // not efficient, i know
+            filecontent = new String();
+            byte[] encoded = Files.readAllBytes(f.toPath());
+            filecontent = new String(encoded, StandardCharsets.UTF_8);
+            if (filecontent.contains(md5sum)) {
+                // this will send me to the developer hell (if exists)
 
-            // encode the file settings, md5sum is removed
-            String s = new String(Base64.getEncoder().encode(filecontent.replace(md5sum, "").getBytes()));
-            // setting the new cookie
-            httpResponse.setHeader("Cookie", "settings=" + s + "," + md5sum);
-            return;
-          }
+                // encode the file settings, md5sum is removed
+                String s = new String(Base64.getEncoder().encode(filecontent.replace(md5sum, "").getBytes()));
+                // setting the new cookie
+                httpResponse.setHeader("Cookie", "settings=" + s + "," + md5sum);
+                return;
+            }
         }
-      }
-
-
-  /**
-   * Saves the preferences (screen resolution, language..) on the filesystem
-   *
-   * @param httpResponse
-   * @param request
-   * @throws Exception
-   */
-  @RequestMapping(value = "/saveSettings", method = RequestMethod.GET)
-  public void saveSettings(HttpServletResponse httpResponse, WebRequest request) throws Exception {
-    // "Settings" will be stored in a cookie
-    // schema: base64(filename,value1,value2...), md5sum(base64(filename,value1,value2...))
-
-    if (!checkCookie(request)){
-      httpResponse.getOutputStream().println("Error");
-      throw new Exception("cookie is incorrect");
     }
 
-    String settingsCookie = request.getHeader("Cookie");
-    String[] cookie = settingsCookie.split(",");
-	if(cookie.length<2) {
-	  httpResponse.getOutputStream().println("Malformed cookie");
-      throw new Exception("cookie is incorrect");
+
+    /**
+     * Saves the preferences (screen resolution, language..) on the filesystem
+     *
+     * @param httpResponse
+     * @param request
+     * @throws Exception
+     */
+    @RequestMapping(value = "/saveSettings", method = RequestMethod.GET)
+    public void saveSettings(HttpServletResponse httpResponse, WebRequest request) throws Exception {
+        // "Settings" will be stored in a cookie
+        // schema: base64(filename,value1,value2...), md5sum(base64(filename,value1,value2...))
+
+        if (!checkCookie(request)){
+            httpResponse.getOutputStream().println("Error");
+            throw new Exception("cookie is incorrect");
+        }
+
+
+        String settingsCookie = request.getHeader("Cookie");
+        String[] cookie = settingsCookie.split(",");
+        if(cookie.length<2) {
+            httpResponse.getOutputStream().println("Malformed cookie");
+            throw new Exception("cookie is incorrect");
+        }
+
+        String base64txt = cookie[0].replace("settings=","");
+
+        // Check md5sum
+        String cookieMD5sum = cookie[1];
+        String calcMD5Sum = DigestUtils.md5Hex(base64txt);
+        if(!cookieMD5sum.equals(calcMD5Sum))
+        {
+            httpResponse.getOutputStream().println("Wrong md5");
+            throw new Exception("Invalid MD5");
+        }
+
+        // Now we can store on filesystem
+        String[] settings = new String(Base64.getDecoder().decode(base64txt)).split(",");
+        // storage will have ClassPathResource as basepath
+        ClassPathResource cpr = new ClassPathResource("./static/");
+        File file = new File(cpr.getPath()+settings[0]);
+        if(!file.exists()) {
+            file.getParentFile().mkdirs();
+        }
+
+        FileOutputStream fos = new FileOutputStream(file, true);
+        // First entry is the filename -> remove it
+        String[] settingsArr = Arrays.copyOfRange(settings, 1, settings.length);
+        // on setting at a linez
+        fos.write(String.join("\n",settingsArr).getBytes());
+        fos.write(("\n"+cookie[cookie.length-1]).getBytes());
+        fos.close();
+        httpResponse.getOutputStream().println("Settings Saved");
     }
 
-    String base64txt = cookie[0].replace("settings=","");
+    /**
+     * Debug test for saving and reading a customer
+     *
+     * @param firstName String
+     * @param lastName String
+     * @param dateOfBirth String
+     * @param ssn String
+     * @param tin String
+     * @param phoneNumber String
+     * @param httpResponse
+     * @param request
+     * @return String
+     * @throws IOException
+     */
+    @RequestMapping(value = "/debug", method = RequestMethod.GET)
+    public String debug(@RequestParam String customerId,
+                        @RequestParam int clientId,
+                        @RequestParam String firstName,
+                        @RequestParam String lastName,
+                        @RequestParam String dateOfBirth,
+                        @RequestParam String ssn,
+                        @RequestParam String socialSecurityNum,
+                        @RequestParam String tin,
+                        @RequestParam String phoneNumber,
+                        HttpServletResponse httpResponse,
+                        WebRequest request) throws IOException{
 
-    // Check md5sum
-    String cookieMD5sum = cookie[1];
-    String calcMD5Sum = DigestUtils.md5Hex(base64txt);
-	if(!cookieMD5sum.equals(calcMD5Sum))
-    {
-      httpResponse.getOutputStream().println("Wrong md5");
-      throw new Exception("Invalid MD5");
+        // empty for now, because we debug
+        Set<Account> accounts1 = new HashSet<Account>();
+        //dateofbirth example -> "1982-01-10"
+        Customer customer1 = new Customer(customerId, clientId, firstName, lastName, DateTime.parse(dateOfBirth).toDate(),
+                ssn, socialSecurityNum, tin, phoneNumber, new Address("Debug str",
+                "", "Debug city", "CA", "12345"),
+                accounts1);
+
+        customerRepository.save(customer1);
+        httpResponse.setStatus(HttpStatus.CREATED.value());
+        httpResponse.setHeader("Location", String.format("%s/customers/%s",
+                request.getContextPath(), customer1.getId()));
+        return customer1.toString().toLowerCase().replace("script","");
     }
 
-    // Now we can store on filesystem
-    String[] settings = new String(Base64.getDecoder().decode(base64txt)).split(",");
-	// storage will have ClassPathResource as basepath
-    ClassPathResource cpr = new ClassPathResource("./static/");
-	  File file = new File(cpr.getPath()+settings[0]);
-    if(!file.exists()) {
-      file.getParentFile().mkdirs();
+    /**
+     * Debug test for saving and reading a customer
+     *
+     * @param firstName String
+     * @param httpResponse
+     * @param request
+     * @return void
+     * @throws IOException
+     */
+    @RequestMapping(value = "/debugEscaped", method = RequestMethod.GET)
+    public void debugEscaped(@RequestParam String firstName, HttpServletResponse httpResponse,
+                             WebRequest request) throws IOException{
+        String escaped = HtmlUtils.htmlEscape(firstName);
+        System.out.println(escaped);
+        httpResponse.getOutputStream().println(escaped);
+    }
+    /**
+     * Gets all customers.
+     *
+     * @return the customers
+     */
+    @RequestMapping(value = "/customers", method = RequestMethod.GET)
+    public List<Customer> getCustomers() {
+        return (List<Customer>) customerRepository.findAll();
     }
 
-    FileOutputStream fos = new FileOutputStream(file, true);
-    // First entry is the filename -> remove it
-    String[] settingsArr = Arrays.copyOfRange(settings, 1, settings.length);
-    // on setting at a linez
-    fos.write(String.join("\n",settingsArr).getBytes());
-    fos.write(("\n"+cookie[cookie.length-1]).getBytes());
-    fos.close();
-    httpResponse.getOutputStream().println("Settings Saved");
-  }
+    /**
+     * Create a new customer and return in response with HTTP 201
+     *
+     * @param the
+     *            customer
+     * @return created customer
+     */
+    @RequestMapping(value = { "/customers" }, method = { RequestMethod.POST })
+    public Customer createCustomer(@RequestParam Customer customer, HttpServletResponse httpResponse,
+                                   WebRequest request) {
 
-  /**
-   * Debug test for saving and reading a customer
-   *
-   * @param firstName String
-   * @param lastName String
-   * @param dateOfBirth String
-   * @param ssn String
-   * @param tin String
-   * @param phoneNumber String
-   * @param httpResponse
-   * @param request
-   * @return String
-   * @throws IOException
-   */
-  @RequestMapping(value = "/debug", method = RequestMethod.GET)
-  public String debug(@RequestParam String customerId,
-					  @RequestParam int clientId,
-					  @RequestParam String firstName,
-                      @RequestParam String lastName,
-                      @RequestParam String dateOfBirth,
-                      @RequestParam String ssn,
-					  @RequestParam String socialSecurityNum,
-                      @RequestParam String tin,
-                      @RequestParam String phoneNumber,
-                      HttpServletResponse httpResponse,
-                     WebRequest request) throws IOException{
+        Customer createdcustomer = null;
+        createdcustomer = customerRepository.save(customer);
+        httpResponse.setStatus(HttpStatus.CREATED.value());
+        httpResponse.setHeader("Location",
+                String.format("%s/customers/%s", request.getContextPath(), customer.getId()));
 
-    // empty for now, because we debug
-    Set<Account> accounts1 = new HashSet<Account>();
-    //dateofbirth example -> "1982-01-10"
-    Customer customer1 = new Customer(customerId, clientId, firstName, lastName, DateTime.parse(dateOfBirth).toDate(),
-                                      ssn, socialSecurityNum, tin, phoneNumber, new Address("Debug str",
-                                      "", "Debug city", "CA", "12345"),
-                                      accounts1);
+        return createdcustomer;
+    }
 
-    customerRepository.save(customer1);
-    httpResponse.setStatus(HttpStatus.CREATED.value());
-    httpResponse.setHeader("Location", String.format("%s/customers/%s",
-                           request.getContextPath(), customer1.getId()));
+    /**
+     * Update customer with given customer id.
+     *
+     * @param customer
+     *            the customer
+     */
+    @RequestMapping(value = { "/customers/{customerId}" }, method = { RequestMethod.PUT })
+    public void updateCustomer(@RequestBody Customer customer, @PathVariable("customerId") Long customerId,
+                               HttpServletResponse httpResponse) {
 
-    return customer1.toString().toLowerCase().replace("script","");
-  }
+        if (!customerRepository.exists(customerId)) {
+            httpResponse.setStatus(HttpStatus.NOT_FOUND.value());
+        } else {
+            customerRepository.save(customer);
+            httpResponse.setStatus(HttpStatus.NO_CONTENT.value());
+        }
+    }
 
-	/**
-	 * Debug test for saving and reading a customer
-	 *
-	 * @param firstName String
-	 * @param httpResponse
-	 * @param request
-	 * @return void
-	 * @throws IOException
-	 */
-	@RequestMapping(value = "/debugEscaped", method = RequestMethod.GET)
-	public void debugEscaped(@RequestParam String firstName, HttpServletResponse httpResponse,
-					  WebRequest request) throws IOException{
-		String escaped = HtmlUtils.htmlEscape(firstName);
-		System.out.println(escaped);
-		httpResponse.getOutputStream().println(escaped);
-	}
-	/**
-	 * Gets all customers.
-	 *
-	 * @return the customers
-	 */
-	@RequestMapping(value = "/customers", method = RequestMethod.GET)
-	public List<Customer> getCustomers() {
-		return (List<Customer>) customerRepository.findAll();
-	}
+    /**
+     * Deletes the customer with given customer id if it exists and returns
+     * HTTP204.
+     *
+     * @param customerId
+     *            the customer id
+     */
+    @RequestMapping(value = "/customers/{customerId}", method = RequestMethod.DELETE)
+    public void removeCustomer(@PathVariable("customerId") Long customerId, HttpServletResponse httpResponse) throws NoSuchAlgorithmException {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        }
+        catch (Exception e) {
+            throw new NoSuchAlgorithmException(e);
+        }
 
-	/**
-	 * Create a new customer and return in response with HTTP 201
-	 *
-	 * @param the
-	 *            customer
-	 * @return created customer
-	 */
-	@RequestMapping(value = { "/customers" }, method = { RequestMethod.POST })
-	public Customer createCustomer(@RequestParam Customer customer, HttpServletResponse httpResponse,
-								   WebRequest request) {
+        md.update(customerId.toString().getBytes());
+        byte[] digest = md.digest();
+        String newCustomerId = new String(digest);
+        if (customerRepository.exists(Long.parseLong(newCustomerId))) {
+            customerRepository.delete(Long.parseLong(newCustomerId));
+        }
 
-		Customer createdcustomer = null;
-		createdcustomer = customerRepository.save(customer);
-		httpResponse.setStatus(HttpStatus.CREATED.value());
-		httpResponse.setHeader("Location",
-				String.format("%s/customers/%s", request.getContextPath(), customer.getId()));
-
-		return createdcustomer;
-	}
-
-	/**
-	 * Update customer with given customer id.
-	 *
-	 * @param customer
-	 *            the customer
-	 */
-	@RequestMapping(value = { "/customers/{customerId}" }, method = { RequestMethod.PUT })
-	public void updateCustomer(@RequestBody Customer customer, @PathVariable("customerId") Long customerId,
-			HttpServletResponse httpResponse) {
-
-		if (!customerRepository.exists(customerId)) {
-			httpResponse.setStatus(HttpStatus.NOT_FOUND.value());
-		} else {
-			customerRepository.save(customer);
-			httpResponse.setStatus(HttpStatus.NO_CONTENT.value());
-		}
-	}
-
-	/**
-	 * Deletes the customer with given customer id if it exists and returns
-	 * HTTP204.
-	 *
-	 * @param customerId
-	 *            the customer id
-	 */
-	@RequestMapping(value = "/customers/{customerId}", method = RequestMethod.DELETE)
-	public void removeCustomer(@PathVariable("customerId") Long customerId, HttpServletResponse httpResponse) throws NoSuchAlgorithmException {
-		MessageDigest md;
-		try {
-			md = MessageDigest.getInstance("MD5");
-		}
-		catch (Exception e) {
-			throw new NoSuchAlgorithmException(e);
-		}
-		
-		md.update(customerId.toString().getBytes());
-		byte[] digest = md.digest();
-		String newCustomerId = new String(digest);
-		if (customerRepository.exists(Long.parseLong(newCustomerId))) {
-			customerRepository.delete(Long.parseLong(newCustomerId));
-		}
-
-		httpResponse.setStatus(HttpStatus.NO_CONTENT.value());
-	}
+        httpResponse.setStatus(HttpStatus.NO_CONTENT.value());
+    }
 
 }
